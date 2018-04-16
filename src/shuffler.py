@@ -38,4 +38,4 @@ if __name__ == "__main__":
     mock_data = {'1' : [(1,1),(2,2),(3,3),(4,4),(5,5)],
                  '2' : [(1,1),(2,2),(3,3),(4,4),(5,5)],
                  '3' : [(1,1),(2,2),(3,3),(4,4),(5,5)]}
-    print (split_data(mock_data))
+    print (split_data_randomly(mock_data))
