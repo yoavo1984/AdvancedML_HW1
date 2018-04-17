@@ -86,6 +86,15 @@ def generate_ratings_matrix(users_dict, movies_dict):
 
     return matrix
 
+def calculate_dataset_mu(dataset):
+    sum_of_rates = 0
+    num_of_rates = 0
+    for key in dataset:
+        for movie_rate in dataset[key]:
+            rate = movie_rate[1]
+            sum_of_rates += rate
+            num_of_rates += 1
+    return round(float(sum_of_rates / num_of_rates), 2)
 
 if __name__ == "__main__":
     movies_data = generate_movies_data_dict("../data/movies.dat")
