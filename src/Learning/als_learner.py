@@ -1,10 +1,6 @@
-import numpy as np
 from Learning.learner import Learner
-
-class something(object):
-    def __init__(self):
-        pass
-
+import numpy as np
+from Evaluations.evaluations import *
 
 class ALSLearner(Learner):
     def __init__(self):
@@ -92,13 +88,18 @@ class ALSLearner(Learner):
         curr_loss = Learner.loss_function(dataset['users_train'], model, hyperparameters)
         prev_loss = np.inf
         iterations = 0
+        size_of_data={}
+        size_of_data["train"] = data_loader.calculate_size_of_data_set(dataset["users_train"])
+        size_of_data["test"] = data_loader.calculate_size_of_data_set(dataset["users_test"])
 
         self.open_log_file(model, hyperparameters)
         self.write_iteration_error_to_file(iterations, curr_loss)
-
+        model.generate_prediction_matrix()
+        run_metrices(dataset, model, 20, size_of_data)
         for iterations in range(1, 10):
             self.ALSIteration(dataset, model, hyperparameters)
             curr_loss = Learner.loss_function(dataset['users_train'], model, hyperparameters)
             prev_loss = curr_loss
-
+            model.generate_prediction_matrix
             self.write_iteration_error_to_file(iterations, curr_loss)
+            run_metrices(dataset, model, 20, size_of_data)

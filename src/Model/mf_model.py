@@ -14,12 +14,22 @@ class MFModel():
         self.b_movie = np.random.normal(scale=0.25, size=num_items).round(2)
         # self.b_movie = self.b_movie.view(np.float128)
 
+        self.prediction_matrix = []
+
         self.mu = mu
 
     def predict(self, user_id, movie_id):
-        result = self.mu + np.dot(self.u[user_id - 1], self.v[movie_id - 1]) + self.b_user[user_id - 1] + self.b_movie[
-            movie_id - 1]
+        result = self.mu + np.dot(self.u[user_id - 1], self.v[movie_id - 1]) + self.b_user[user_id - 1] + self.b_movie[movie_id - 1]
         return round(float(result), 2)
+
+    def get_user_predictions(self, user_id):
+        return self.prediction_matrix[user_id-1]
+
+    def get_movie_predictions(self, movie_id):
+        return self.prediction_matrix[movie_id-1]
+
+    def generate_prediction_matrix(self):
+        self.prediction_matrix = np.dot(self.u, self.v.T)
 
     def u_v_dot(self, user_id, movie_id):
         return np.dot(self.u[user_id-1], self.v[movie_id-1])
