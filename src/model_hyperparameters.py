@@ -146,10 +146,10 @@ def LearnModelFromDataUsingALS(dataset, model, hyperparameters):
 
     for i in range(10):
 
-        ALSSolver.compute_b_m(dataset, model, hyperparameters)
-        ALSSolver.compute_b_n(dataset, model, hyperparameters)
-        ALSSolver.compute_u_m(dataset, model, hyperparameters)
-        ALSSolver.compute_v_n(dataset, model, hyperparameters)
+        ALSSolver.solve_b_m(dataset, model, hyperparameters)
+        ALSSolver.solve_b_n(dataset, model, hyperparameters)
+        ALSSolver.solve_u_m(dataset, model, hyperparameters)
+        ALSSolver.solve_v_n(dataset, model, hyperparameters)
 
         print("##### {} #####".format(i))
         prev_loss = curr_loss
