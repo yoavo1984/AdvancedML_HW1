@@ -4,7 +4,7 @@ from Model.mf_model import  MFModel
 from Model.hyper_parameters import *
 from Learning.sgd_learner import SGDLearner
 from Learning.als_learner import ALSLearner
-from Evaluations.evaluations import *
+import dataset
 
 
 def run_sgd(dataset, model):
@@ -22,25 +22,17 @@ def run_als(dataset, model):
 
 
 if __name__ == "__main__":
-    dataset = {}
-
-    # Generating users datasets.
-    dataset["users"] = data_loader.generate_users_dict("../data/ratings.dat", num_ratings=500000)
-    dataset["users_train"], dataset["users_test"] = shuffler.split_data_randomly(dataset["users"])
-
-    # Generating movies datasets.
-    dataset["movies_train"] = data_loader.generate_movies_dict_from_users_dict(dataset["users_train"])
-    dataset["movies_test"] = data_loader.generate_movies_dict_from_users_dict(dataset["users_test"])
+    rating_dataset = dataset.Dataset("../data/movies.dat", "../data/ratings.dat")
 
     # Calculate mean.
-    mu = data_loader.calculate_dataset_mu(dataset["users_train"])
-    # calculate size of data
-    # size_of_data = data_loader.calculate_size_of_data_set(dataset["users"])
+    train_dataset = rating_dataset.get_train_dataset()
+    mu = dataset.Dataset.get_dataset_mean_rating(train_dataset)
 
-    model = MFModel(len(dataset["users_train"]), 3960, k=40, mu=mu)
+    num_users = rating_dataset.get_number_of_users()
+    num_movies = rating_dataset.get_number_of_movies()
 
-    run_als(dataset, model)
+    model = MFModel(num_users, num_movies, k=5, mu=mu)
 
-
+    run_als(train_dataset, model)
     # run_sgd(dataset, model)
 

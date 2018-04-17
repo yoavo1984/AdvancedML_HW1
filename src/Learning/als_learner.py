@@ -11,7 +11,7 @@ class ALSLearner(Learner):
         # sum (r_m,n) - (mu + b_n + u_m^t v_n) / lambda_b_m + countb_m
 
         # Enumerate over all users.
-        for user_id, movies_ratings in dataset['users_train'].items():
+        for user_id, movies_ratings in dataset['users'].items():
             bias_sum = 0
             for rating in movies_ratings:
                 movie_id, true_rating = *rating,
@@ -28,7 +28,7 @@ class ALSLearner(Learner):
         # sum (r_m,n) - (mu + b_m + u_m^t v_n) / lambda_b_n + countb_n
 
         # Enumerate over all movies.
-        for movie_id, users_ratings in dataset['movies_train'].items():
+        for movie_id, users_ratings in dataset['movies'].items():
             bias_sum = 0
             for rating in users_ratings:
                 user_id, true_rating = *rating,
@@ -43,7 +43,7 @@ class ALSLearner(Learner):
 
     def solve_u_m (self, dataset, model, hyperparameters):
         # Enumerate over all users.
-        for user_id, movies_ratings in dataset['users_train'].items():
+        for user_id, movies_ratings in dataset['users'].items():
             inverse_matrix = np.zeros((hyperparameters.k, hyperparameters.k))
             predicton_delta_vector = np.zeros((hyperparameters.k, 1))
 
@@ -62,7 +62,7 @@ class ALSLearner(Learner):
 
 
     def solve_v_n (self, dataset, model, hyperparameters):
-        for movie_id, users_ratings in dataset['movies_train'].items():
+        for movie_id, users_ratings in dataset['movies'].items():
             inverse_matrix = np.zeros((hyperparameters.k, hyperparameters.k))
             predicton_delta_vector = np.zeros((hyperparameters.k, 1))
 
@@ -85,7 +85,7 @@ class ALSLearner(Learner):
         self.solve_v_n(dataset, model, hyperparameters)
 
     def LearnModelFromDataUsingALS(self, dataset, model, hyperparameters):
-        curr_loss = Learner.loss_function(dataset['users_train'], model, hyperparameters)
+        curr_loss = Learner.loss_function(dataset['users'], model, hyperparameters)
         prev_loss = np.inf
         iterations = 0
         size_of_data={}
@@ -98,7 +98,7 @@ class ALSLearner(Learner):
         run_metrices(dataset, model, 20, size_of_data)
         for iterations in range(1, 10):
             self.ALSIteration(dataset, model, hyperparameters)
-            curr_loss = Learner.loss_function(dataset['users_train'], model, hyperparameters)
+            curr_loss = Learner.loss_function(dataset['users'], model, hyperparameters)
             prev_loss = curr_loss
             model.generate_prediction_matrix
             self.write_iteration_error_to_file(iterations, curr_loss)

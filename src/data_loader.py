@@ -21,7 +21,7 @@ def parse_movie_line(line):
     return id, name, genres
 
 
-def generate_users_dict(file_path, num_ratings=-1):
+def generate_users_dict(file_path, missing_movie_id_index, num_ratings=-1):
     users_dict = {}
     with open(file_path, mode='rb') as user_ratings:
         # Remove the description line.
@@ -35,25 +35,12 @@ def generate_users_dict(file_path, num_ratings=-1):
             if int(user_id) not in users_dict:
                 user_id = int(user_id)
                 users_dict[user_id] = []
+            if int(movie_id) in missing_movie_id_index:
+                movie_id = missing_movie_id_index[int(movie_id)]
             users_dict[int(user_id)].append((int(movie_id), int(rating)))
 
     return users_dict
 
-# def generate_movies_dict(file_path):
-#     movies_dict = {}
-#     with open(file_path, mode='rb') as user_ratings:
-#         # Remove the description line.
-#         user_ratings.readline()
-#
-#         rating_lines = user_ratings.readlines()
-#         for line in rating_lines:
-#             user_id, movie_id, rating = parse_rating_line(line)
-#             if int(movie_id) not in movies_dict:
-#                 movie_id = int(movie_id)
-#                 movies_dict[movie_id] = []
-#             movies_dict[int(movie_id)].append((int(user_id), int(rating)))
-#
-#     return movies_dict
 
 def generate_movies_dict_from_users_dict(users_dict):
     movies_dict = {}
@@ -65,7 +52,6 @@ def generate_movies_dict_from_users_dict(users_dict):
 
             movies_dict[movie].append((user_id, rate))
     return movies_dict
-
 
 
 def parse_rating_line(line):
@@ -105,12 +91,34 @@ def calculate_size_of_data_set(dataset):
             num_of_rates += 1
     return num_of_rates
 
+
+def generate_movie_missing_ids_indices(file_path):
+    with open(file_path, mode='rb') as user_ratings:
+        rating_lines = user_ratings.readlines()
+        missing_ids = []
+        offset = 0
+        last_id = 0
+        for index, line in enumerate(rating_lines[0:]):
+            id, _, _ = parse_movie_line(line)
+            if int(id)-1 != index+offset:
+                offset += 1
+                missing_ids.append(index+offset)
+            last_id = id
+
+    index_dict = {}
+    for index, value in enumerate(missing_ids):
+        index_dict[int(last_id)-index] = value
+
+    return index_dict
+
+
 if __name__ == "__main__":
+    # missing_movie_index_dict = find_missing_id("../data/movies.dat")
+
     movies_data = generate_movies_data_dict("../data/movies.dat")
-    users = generate_users_dict("../data/ratings.dat")
+    users = generate_users_dict("../data/ratings.dat", missing_movie_index_dict)
+
     movies = generate_movies_dict_from_users_dict(users)
     # movies = generate_movies_dict("../data/ratings.dat")
     matrix = generate_ratings_matrix(users ,movies)
-
-    print(matrix[:25][:25])
 
