@@ -85,21 +85,29 @@ class ALSLearner(Learner):
         self.solve_v_n(dataset, model, hyperparameters)
 
     def LearnModelFromDataUsingALS(self, dataset, model, hyperparameters):
-        curr_loss = Learner.loss_function(dataset['users'], model, hyperparameters)
+        train_dataset = dataset.get_train_dataset()
+        test_dataset = dataset.get_test_dataset()
+
+        curr_loss = Learner.loss_function(train_dataset["users"], model, hyperparameters)
         prev_loss = np.inf
         iterations = 0
+
         size_of_data={}
-        size_of_data["train"] = data_loader.calculate_size_of_data_set(dataset["users_train"])
-        size_of_data["test"] = data_loader.calculate_size_of_data_set(dataset["users_test"])
+        size_of_data["train"] = dataset.calculate_size_of_data_set(train_dataset["users"])
+        size_of_data["test"] = dataset.calculate_size_of_data_set(test_dataset["users"])
 
         self.open_log_file(model, hyperparameters)
         self.write_iteration_error_to_file(iterations, curr_loss)
-        model.generate_prediction_matrix()
-        run_metrices(dataset, model, 20, size_of_data)
+
         for iterations in range(1, 10):
-            self.ALSIteration(dataset, model, hyperparameters)
-            curr_loss = Learner.loss_function(dataset['users'], model, hyperparameters)
+            model.generate_prediction_matrix()
+
+            self.ALSIteration(train_dataset, model, hyperparameters)
+
+            curr_loss = Learner.loss_function(train_dataset['users'], model, hyperparameters)
             prev_loss = curr_loss
-            model.generate_prediction_matrix
+
             self.write_iteration_error_to_file(iterations, curr_loss)
-            run_metrices(dataset, model, 20, size_of_data)
+
+        run_metrices(train_dataset, model, 20, size_of_data["train"])
+        run_metrices(test_dataset, model, 20, size_of_data["test"])

@@ -29,7 +29,8 @@ class MFModel():
         return self.prediction_matrix[movie_id-1]
 
     def generate_prediction_matrix(self):
-        self.prediction_matrix = np.dot(self.u, self.v.T)
+        # maybe mistake is here????
+        self.prediction_matrix = np.dot(self.u, self.v.T) + self.b_movie.T + self.b_user.reshape(len(self.b_user),1) + self.mu
 
     def u_v_dot(self, user_id, movie_id):
         return np.dot(self.u[user_id-1], self.v[movie_id-1])
