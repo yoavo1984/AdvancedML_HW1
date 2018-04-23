@@ -2,6 +2,9 @@ from Learning.learner import Learner
 import numpy as np
 from Evaluations.evaluations import *
 
+TEST= "test"
+TRAIN = "train"
+
 class ALSLearner(Learner):
     def __init__(self):
         super().__init__()
@@ -84,11 +87,12 @@ class ALSLearner(Learner):
         self.solve_u_m(dataset, model, hyperparameters)
         self.solve_v_n(dataset, model, hyperparameters)
 
-    def LearnModelFromDataUsingALS(self, dataset, model, hyperparameters):
+    def LearnModelFromDataUsingALS(self, dataset, model, hyperparameters, save_to_file=False):
         train_dataset = dataset.get_train_dataset()
         test_dataset = dataset.get_test_dataset()
 
-        curr_loss = Learner.loss_function(train_dataset["users"], model, hyperparameters)
+        train_curr_loss = Learner.loss_function(train_dataset["users"], model, hyperparameters)
+        test_curr_loss = Learner.loss_function(test_dataset["users"], model, hyperparameters)
         prev_loss = np.inf
         iterations = 0
 
@@ -96,17 +100,20 @@ class ALSLearner(Learner):
         size_of_data["train"] = dataset.calculate_size_of_data_set(train_dataset["users"])
         size_of_data["test"] = dataset.calculate_size_of_data_set(test_dataset["users"])
 
-        # self.open_log_file(model, hyperparameters)
-        # self.write_iteration_error_to_file(iterations, curr_loss)
+        self.open_log_file(TRAIN, model, hyperparameters)
+        self.open_log_file(TEST, model, hyperparameters)
+
+        self.write_iteration_error_to_file(TRAIN, iterations, train_curr_loss)
+        self.write_iteration_error_to_file(TEST, iterations, test_curr_loss)
 
         for iterations in range(1, 5):
-
             model.generate_prediction_matrix()
-
             self.ALSIteration(train_dataset, model, hyperparameters)
 
-            curr_loss = Learner.loss_function(train_dataset['users'], model, hyperparameters)
-            prev_loss = curr_loss
+            train_curr_loss = Learner.loss_function(train_dataset['users'], model, hyperparameters)
+            test_curr_loss = Learner.loss_function(test_dataset['users'], model, hyperparameters)
+            prev_loss = train_curr_loss
 
-            # self.write_iteration_error_to_file(iterations, curr_loss)
-            print ("Finished iteration {}".format(iterations))
+            self.write_iteration_error_to_file(TRAIN, iterations, train_curr_loss)
+            self.write_iteration_error_to_file(TEST, iterations, test_curr_loss)
+
