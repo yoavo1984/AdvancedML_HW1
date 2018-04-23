@@ -118,4 +118,4 @@ class ALSLearner(Learner):
 
 
         # run_metrices(train_dataset, model, 20, size_of_data["train"])
-        run_metrices(test_dataset, model, 20, size_of_data["test"])
+        run_metrices(test_dataset, model, 20, size_of_data["test"], 1)

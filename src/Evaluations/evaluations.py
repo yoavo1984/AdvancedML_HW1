@@ -1,7 +1,6 @@
 import math
 import numpy as np
 import data_loader
-import dataset
 
 
 def se(dataset, model):
@@ -35,6 +34,7 @@ def rmse(dataset, model, size_of_data):
     sum = math.sqrt(sum)
 
     return sum
+
 
 def mean_percentile_rank(dataset_users, model, k):
     """
@@ -101,8 +101,19 @@ def create_predicted(dataset, model, user_id, k):
     best_k_predicted_indices = user_rated_movies[best_k_predicted] + 1
 
     return set(best_k_predicted_indices)
-#
+
+
+def recall_k(dataset_users, model, k):
+    _, _, users_recall_k, reca_k = calc_precision_recall_k(dataset_users, model, k)
+    return users_recall_k, reca_k
+
+
 def precision_k(dataset_users, model, k):
+    users_prec_k, prec_k, _, _ = calc_precision_recall_k(dataset_users, model, k)
+    return users_prec_k, prec_k
+
+
+def calc_precision_recall_k(dataset_users, model, k):
     """
     TP = # ground truth intersect predict (top k)
     FP = # results in top k but not in ground truth
@@ -136,7 +147,7 @@ def precision_k(dataset_users, model, k):
 
     return users_prec_k, np.mean(users_prec_k), users_reca_k, np.mean(users_reca_k)
 
-def single_user_precision(dataset_users, user_id, model, k):
+def single_user_precision_recall(dataset_users, user_id, model, k):
     """
     TP = # ground truth intersect predict (top k)
     FP = # results in top k but not in ground truth
@@ -170,11 +181,13 @@ def map(dataset_users, model):
         sum2 = 0
         prev_reca_k = 0
         for i in range(1, n+1):
-            prec_k, reca_k = single_user_precision(dataset_users, user_id, model, i)
-            sum2 += prec_k
+            prec_k, reca_k = single_user_precision_recall(dataset_users, user_id, model, i)
+
             change_in_recall = reca_k-prev_reca_k
             sum1 += prec_k*change_in_recall
             prev_reca_k = reca_k
+
+            sum2 += prec_k
 
         # divide the sum buy the sum of relevant items a.k.a # of movies above 4..
         # in our case we will choose this number to be n
@@ -278,7 +291,7 @@ def run_metrices(dataset, model, k, size_of_data, output_ranked_items):
     mpr = mean_percentile_rank(dataset["users"], model, k)
     se_score = se(dataset["users"], model)
     rmse_score = rmse(dataset["users"], model, size_of_data)
-    users_prec_k, prec_k, users_recall_k, reca_k = precision_k(dataset["users"] , model, k)
+    users_prec_k, prec_k, users_recall_k, reca_k = calc_precision_recall_k(dataset["users"] , model, k)
     mean_avg_precision_lecture, mean_avg_precision_internet = map(dataset["users"], model)
     print ("MPR:{}, SE:{}, RMSE:{}\nP@k:{}, R@k:{}\nMAP_Lecture:{}, MAP_Internet:{}".format(mpr, se_score, rmse_score, prec_k, reca_k, mean_avg_precision_lecture, mean_avg_precision_internet))
     print ("#"*80 + "\n")
