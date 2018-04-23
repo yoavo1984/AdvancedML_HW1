@@ -8,7 +8,7 @@ from Learning.sgd_learner import SGDLearner
 from Learning.als_learner import ALSLearner
 import dataset
 
-MODEL_K = 40
+MODEL_K = 20
 RATINGS_SIZE = 100000
 
 def deliverable_two(dataset, model):
@@ -46,7 +46,7 @@ if __name__ == "__main__":
 
     model = MFModel(num_users, num_movies, k=MODEL_K, mu=mu)
 
-    # run_als(rating_dataset, model)
+    run_als(rating_dataset, model)
     # run_sgd(rating_dataset, model)
-    deliverable_two(rating_dataset, model)
+    # deliverable_two(rating_dataset, model)
 

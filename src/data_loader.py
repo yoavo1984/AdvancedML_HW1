@@ -2,13 +2,14 @@ from collections import namedtuple
 import numpy as np
 MovieData = namedtuple('MovieData', 'name genres')
 
+
 def generate_movies_data_dict(file_path):
     movies_dict = {}
     with open(file_path, mode='rb') as movies_data:
         movie_lines = movies_data.readlines()
         for line in movie_lines:
             id, name, geners = parse_movie_line(line[:-1])
-            movies_dict[id] = MovieData(name, geners)
+            movies_dict[int(id)] = MovieData(name, geners)
 
     return movies_dict
 

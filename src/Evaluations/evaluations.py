@@ -1,5 +1,7 @@
 import math
 import numpy as np
+import data_loader
+import dataset
 
 
 def se(dataset, model):
@@ -71,8 +73,11 @@ def create_ground_truth(user_data, k):
     # keeping above 4 or 3.5 sometimes gives 0 movies...
     sorted_above_4 = [item for item in sorted_by_rate if item[1] >= 4]
     if len(sorted_above_4) == 0:
-    # instead we will use top 25 movies in user's true ratings
+    # instead we will use top 25 movies in user's true
         sorted_above_4 = sorted_by_rate[-25::]
+
+    # trying to take only k movies for ground truth
+    sorted_above_4 = sorted_by_rate[-k::]
 
     # sort by movie id
     sorted_above_4 = sorted(sorted_above_4, key=lambda tup: tup[0])
@@ -97,11 +102,13 @@ def create_predicted(dataset, model, user_id, k):
 
     return set(best_k_predicted_indices)
 #
-def precision_k(dataset_users, dataset_movies, model, k):
+def precision_k(dataset_users, model, k):
     """
     TP = # ground truth intersect predict (top k)
     FP = # results in top k but not in ground truth
+    TN = # results in ground truth but not in top k
     p@k = TP / (TP+FP) = TP / k
+    r@k = TP / (TP+TN) = TP / N
     """
     users_prec_k=np.zeros(len(dataset_users))
     users_reca_k=np.zeros(len(dataset_users))
@@ -129,49 +136,72 @@ def precision_k(dataset_users, dataset_movies, model, k):
 
     return users_prec_k, np.mean(users_prec_k), users_reca_k, np.mean(users_reca_k)
 
-
-def recall_k(dataset_users, dataset_movies, model, k):
+def single_user_precision(dataset_users, user_id, model, k):
     """
     TP = # ground truth intersect predict (top k)
+    FP = # results in top k but not in ground truth
     TN = # results in ground truth but not in top k
-    N = total # of results in ground truth
-    R@k = TP / (TP+TN) = TP / N
+    p@k = TP / (TP+FP) = TP / k
+    r@k = TP / (TP+TN) = TP / N
     """
-    users_k=np.zeros(len(dataset_users))
+
+    # print (user_id)
+    ground_truth_set = create_ground_truth(dataset_users[user_id], k)
+    ground_truth_set = set(ground_truth_set)
+
+    predicted_set = create_predicted(dataset_users, model, user_id, k)
+
+    tp = ground_truth_set.intersection(predicted_set)
+    fp = predicted_set.difference(ground_truth_set)
+    tn = ground_truth_set.difference(predicted_set)
+
+    prec_k = len(tp) / k
+    reca_k = len(tp) / (len(tp) + len(tn))
+
+    return prec_k, reca_k
+
+
+def map(dataset_users, model):
+    # sum1 is the lecture formula
+    # sum2 is the internet formula
+    def average_preciison(n, num_of_user_ratings):
+        # n+1 because we include n value
+        sum1 = 0
+        sum2 = 0
+        prev_reca_k = 0
+        for i in range(1, n+1):
+            prec_k, reca_k = single_user_precision(dataset_users, user_id, model, i)
+            sum2 += prec_k
+            change_in_recall = reca_k-prev_reca_k
+            sum1 += prec_k*change_in_recall
+            prev_reca_k = reca_k
+
+        # divide the sum buy the sum of relevant items a.k.a # of movies above 4..
+        # in our case we will choose this number to be n
+        # so if we are right at all iterations of p@k up to n we will get score of 1
+        # sum1 does not need to be divided by the number of reco. because the recall diff is making this the same
+        sum1 = sum1
+        sum2 = sum2 / n
+        return sum1, sum2
+
+    sum1 = 0
+    sum2 = 0
     for user_id in dataset_users:
-        ground_truth_set = create_ground_truth(dataset_users[user_id], k)
-        ground_truth_set = set(ground_truth_set)
-
-        predicted_set = create_predicted(dataset_movies, model, user_id, k)
-        # because set.intersection would return predicted after removing ground truth from it
-        tp = predicted_set.intersection(ground_truth_set)
-        tn = ground_truth_set.difference(predicted_set)
-
-        result = len(tp) / (len(tp) + len(tn))
-        # n???
-        # result1 = len(tp) / len(dataset_users[user_id])
-        # if result != result1:
-        #     print ("oy")
-        users_k[user_id-1] = result
-
-    return users_k ,np.mean(users_k)
+        AP1, AP2 = average_preciison(3, len(dataset_users[user_id]))
+        sum1 += AP1
+        sum2 += AP2
 
 
-def map(users_prec_k, users_recall_k, dataset_users):
-    results_array = np.zeros(len(dataset_users))
-    users_num_of_rating_array=np.zeros(len(dataset_users))
-    for user in dataset_users:
-        users_num_of_rating_array[user-1] = len(dataset_users[user])
-
-    results_array = (users_prec_k * users_recall_k) / users_num_of_rating_array
-
-    return np.mean(results_array)
+    sum1 = sum1 / len(dataset_users)
+    sum2 = sum2 / len(dataset_users)
 
 
-def create_ranked_items_for_users(model, dataset_users, h):
+    return sum1, sum2
+
+
+def print_ranked_items(model, dataset_users, h):
     """
     for each user output h ranked items
-        pass
     """
     users_h_ratings={}
     for user_id in dataset_users:
@@ -179,10 +209,12 @@ def create_ranked_items_for_users(model, dataset_users, h):
         # last index is the movie name with the highest rating
         indexes = np.argsort(predictions)
 
-        h_items = np.zeros(len(indexes))
+        h_items = []
+
         # going over movies from last to first (highest rating to lowest)
         for rank, movie_id in enumerate(indexes[-h::]):
-            h_items.append((rank, movie_id))
+            h_items.append(movie_id)
+            h_items = h_items[::-1]
 
         users_h_ratings[user_id] = h_items
 
@@ -196,37 +228,64 @@ def create_metrices_for_user(users_h_ratings, k):
     return
 
 
-# def human_readable_output(dataset_users, model, user_id, h):
+def human_readable_output(dataset_users, dataset, model, user_id, h):
     """
     output user history votes with names of items on training set
     output top h items recommended
     """
-    # for movie_rating in dataset_users[user_id]:
-        # get name of movie by id
-        # print (movie_rating)
-    #
-    # predictions = model.get_user_predictions(user_id)
-    # # last index is the movie name with the highest rating
-    # indexes = np.argsort(predictions)
-    # top_h_movie = indexes[-h::]
-    #
-    # # sort by movie id
-    # top_h_movie = sorted(top_h_movie)
-    # print (top_h_movie)
-    # return
+    movies_dict = data_loader.generate_movies_data_dict("../data/movies.dat")
+    missing_movies_id = dataset.missing_movies_ids_dict
+    oppo_missing_movies_id = new_dict = dict (zip(missing_movies_id.values(),missing_movies_id.keys()))
 
 
-def run_metrices(dataset, model, k, size_of_data):
+    print ("#"*80 + "\n")
+    print ("Printing history rates for user {0}".format(user_id))
+
+    for movie_rating in dataset_users[user_id]:
+        movie_id = movie_rating[0]
+        movie_rate = movie_rating[1]
+        if movie_id in oppo_missing_movies_id:
+            movie_id = oppo_missing_movies_id[movie_id]
+
+        movie_name = movies_dict[movie_id][0]
+        movie_rate = movie_rate
+
+        print ("{0}:{1}".format(movie_name, movie_rate))
+
+    predictions = model.get_user_predictions(user_id)
+    # last index is the movie name with the highest rating
+    indexes = np.argsort(predictions)
+    top_h_movies = indexes[-h:]
+
+    # sort by movie id
+    top_h_movies = sorted(top_h_movies)
+    print ("#"*80 + "\n")
+    print ("Printing top {0} movies for user {1}".format(h, user_id))
+    for movie_id in top_h_movies[::-1]:
+        if movie_id+1 in oppo_missing_movies_id:
+            movie_id = oppo_missing_movies_id[movie_id+1]
+            print ("{0}".format(movies_dict[movie_id][0]))
+
+        else:
+            print ("{0}".format(movies_dict[movie_id+1][0]))
+    print ("#"*80 + "\n")
+
+    return
+
+
+def run_metrices(dataset, model, k, size_of_data, output_ranked_items):
     print ("--- Running metrices for " + dataset["name"] + " ---")
     mpr = mean_percentile_rank(dataset["users"], model, k)
     se_score = se(dataset["users"], model)
     rmse_score = rmse(dataset["users"], model, size_of_data)
-    users_prec_k, prec_k, users_recall_k, reca_k = precision_k(dataset["users"],dataset["movies"] , model, k)
-    mean_avg_precision = map(users_prec_k, users_recall_k, dataset["users"])
-
-    print ("MPR:{}, SE:{}, RMSE:{}\nP@k:{}, R@k:{}, MAP:{}".format(mpr, se_score, rmse_score, prec_k, reca_k, mean_avg_precision))
-
+    users_prec_k, prec_k, users_recall_k, reca_k = precision_k(dataset["users"] , model, k)
+    mean_avg_precision_lecture, mean_avg_precision_internet = map(dataset["users"], model)
+    print ("MPR:{}, SE:{}, RMSE:{}\nP@k:{}, R@k:{}\nMAP_Lecture:{}, MAP_Internet:{}".format(mpr, se_score, rmse_score, prec_k, reca_k, mean_avg_precision_lecture, mean_avg_precision_internet))
     print ("#"*80 + "\n")
+
+    if output_ranked_items == 1:
+        print_ranked_items(model, dataset["users"], 2)
+
 
 if __name__ == "__main__":
     pass
