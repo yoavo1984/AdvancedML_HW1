@@ -96,8 +96,8 @@ class ALSLearner(Learner):
         size_of_data["train"] = dataset.calculate_size_of_data_set(train_dataset["users"])
         size_of_data["test"] = dataset.calculate_size_of_data_set(test_dataset["users"])
 
-        self.open_log_file(model, hyperparameters)
-        self.write_iteration_error_to_file(iterations, curr_loss)
+        # self.open_log_file(model, hyperparameters)
+        # self.write_iteration_error_to_file(iterations, curr_loss)
 
         for iterations in range(1, 5):
 
@@ -109,7 +109,7 @@ class ALSLearner(Learner):
             curr_loss = Learner.loss_function(train_dataset['users'], model, hyperparameters)
             prev_loss = curr_loss
 
-            self.write_iteration_error_to_file(iterations, curr_loss)
+            # self.write_iteration_error_to_file(iterations, curr_loss)
 
         # Human readable
         #     human_readable_output(train_dataset['users'], dataset, model, 1, h=20)
@@ -117,3 +117,5 @@ class ALSLearner(Learner):
         #     human_readable_output(train_dataset['users'], dataset,model, 3, h=20)
 
 
+        # run_metrices(train_dataset, model, 20, size_of_data["train"])
+        run_metrices(test_dataset, model, 20, size_of_data["test"])

@@ -33,6 +33,12 @@ class Dataset():
     def get_number_of_movies(self):
         return len(self.movies_dict)
 
+    def get_test_dataset_size(self):
+        return self.calculate_size_of_data_set(self.test_data)
+
+    def get_train_dataset_size(self):
+        return self.calculate_size_of_data_set(self.train_data)
+
     @staticmethod
     def get_dataset_mean_rating(dataset):
         users_dataset = dataset['users']

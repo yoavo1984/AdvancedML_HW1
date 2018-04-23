@@ -1,6 +1,9 @@
 import matplotlib.pyplot as plt
 from Diagnostics.pdf_generator import PDFGenerator
 
+DELIVERABLE_3_FILE = "../deliverable/deliverable_3_data"
+DELIVERABLE_4_FILE = "../deliverable/deliverable_4_data"
+
 def plot_train_and_test_vs_iteration(name, train_data, test_data, save=True):
     # Plot the test and the train data errors.
     plt.plot(test_data)
@@ -48,7 +51,62 @@ def sgd_als_errors_plots(sgd_files, als_files, hyperparameters, save=True):
         pdf.add_image(als_plot)
         pdf.close()
 
+def parse_plot_file(file_name):
+    x_values = []
+    y_values = []
+    with open(file_name) as file:
+        content = file.readlines()
+        for line in content:
+            x, y = line.split("::")
+            x_values.append(x)
+            y_values.append(y)
 
+    return x_values, y_values
+
+def parse_double_plot_file(file_name):
+    x_values = []
+    y_values = []
+    z_values = []
+    with open(file_name) as file:
+        content = file.readlines()
+        for line in content:
+            x, y, z = line.split("::")
+            x_values.append(x)
+            y_values.append(y)
+            z_values.append(z)
+
+    return x_values, y_values, z_values
+
+def generate_deliverable_three():
+    d_values, m1_values, m2_values = parse_double_plot_file(DELIVERABLE_3_FILE)
+
+    plt.plot(d_values, m1_values)
+    plt.ylabel("Rmse")
+    plt.xlabel("D(latent variables) value")
+
+    plt.show()
+    plt.clf()
+
+    plt.plot(d_values, m2_values)
+    plt.ylabel("Recall@10")
+    plt.xlabel("D(latent variables) value")
+
+    plt.show()
+    plt.clf()
+
+def generate_deliverable_four():
+    x_values, y_values = parse_plot_file(DELIVERABLE_4_FILE)
+
+    plt.plot(x_values, y_values)
+    plt.title("Running Time")
+
+    plt.xscale('log')
+
+    plt.ylabel("Running Time")
+    plt.xlabel("D(latent variables) value")
+
+    plt.show()
+    plt.clf()
 
 def test_plot():
     train_error_mock = [2, 1.3, 1.1, 0.8, 0.67, 0.51, 0.44, 0.27, 0.11, 0.02]
@@ -56,5 +114,8 @@ def test_plot():
     plot_train_and_test_vs_iteration("SGD_Error", train_error_mock, test_error_mock, True)
 
 if __name__ == "__main__":
-    print("Error file parsed = {}".format(parse_error_file("mock_data")))
-    sgd_als_errors_plots(["mock_data", "mock_data_2"], ["mock_data", "mock_data_2"], "hyperparameters")
+    # print("Error file parsed = {}".format(parse_error_file("mock_data")))
+    # sgd_als_errors_plots(["mock_data", "mock_data_2"], ["mock_data", "mock_data_2"], "hyperparameters")
+    # generate_deliverable_four(DELIVERABLE_4_FILE)
+    generate_deliverable_three()
+
