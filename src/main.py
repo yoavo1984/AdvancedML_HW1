@@ -109,24 +109,34 @@ def run_als(dataset, model):
     return model
 
 def part_six():
-
+    print ("Running part 6 - Main Flow")
     # loading and splitting data
     rating_dataset = dataset.Dataset("../data/movies.dat", "../data/ratings.dat", RATINGS_SIZE)
     train_dataset = rating_dataset.get_train_dataset()
+    test_dataset = rating_dataset.get_test_dataset()
+
     mu = dataset.Dataset.get_dataset_mean_rating(train_dataset)
     num_users = rating_dataset.get_number_of_users()
     num_movies = rating_dataset.get_number_of_movies()
 
+    size_of_data = {}
+    size_of_data["train"] = rating_dataset.calculate_size_of_data_set(train_dataset["users"])
+    size_of_data["test"] = rating_dataset.calculate_size_of_data_set(test_dataset["users"])
+
     # define model parameters
+    model = MFModel(num_users, num_movies, k=MODEL_K, mu=mu)
     hyperparametersALS = MFALSHyperparameters(k=MODEL_K, alpha=0.002, gamma_array=[10]*4, epsilon=0.001)
-    learner = ALSLearner()
+    learner_six = ALSLearner()
 
     # training model
-    trained_model = run_als(rating_dataset, model)
+    learner_six.LearnModelFromDataUsingALS(rating_dataset, model, hyperparametersALS)
 
     # cimpute metrices on test set
-    run_metrices(test_dataset, model, 20, size_of_data["test"], 1)
+    run_metrices(test_dataset, model, 2, size_of_data["test"], 0)
+    run_metrices(test_dataset, model, 10, size_of_data["test"], 0)
 
+    # print to file (hyper, metrices, time of training)
+    pass
 
 if __name__ == "__main__":
     rating_dataset = dataset.Dataset("../data/movies.dat", "../data/ratings.dat", RATINGS_SIZE)
@@ -138,13 +148,14 @@ if __name__ == "__main__":
     num_users = rating_dataset.get_number_of_users()
     num_movies = rating_dataset.get_number_of_movies()
 
-    model = MFModel(num_users, num_movies, k=MODEL_K, mu=mu)
-    trained_model = run_als(rating_dataset, model)
 
     part_six()
 
+    
     # deliverable_two(rating_dataset, model)
     # deliverable_three(rating_dataset, model)
     # deliverable_four(rating_dataset, model)
+    # model = MFModel(num_users, num_movies, k=MODEL_K, mu=mu)
+    # trained_model = run_als(rating_dataset, model)
     # deliverable_five(rating_dataset, trained_model)
 

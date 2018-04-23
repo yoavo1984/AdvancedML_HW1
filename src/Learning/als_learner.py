@@ -109,3 +109,4 @@ class ALSLearner(Learner):
             prev_loss = curr_loss
 
             # self.write_iteration_error_to_file(iterations, curr_loss)
+            print ("Finished iteration {}".format(iterations))
