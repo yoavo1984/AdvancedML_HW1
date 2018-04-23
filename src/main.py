@@ -109,17 +109,23 @@ def run_als(dataset, model):
     return model
 
 def part_six():
-    rating_dataset = dataset.Dataset("../data/movies.dat", "../data/ratings.dat", RATINGS_SIZE)
 
+    # loading and splitting data
+    rating_dataset = dataset.Dataset("../data/movies.dat", "../data/ratings.dat", RATINGS_SIZE)
     train_dataset = rating_dataset.get_train_dataset()
     mu = dataset.Dataset.get_dataset_mean_rating(train_dataset)
-
     num_users = rating_dataset.get_number_of_users()
     num_movies = rating_dataset.get_number_of_movies()
 
-    model = MFModel(num_users, num_movies, k=MODEL_K, mu=mu)
+    # define model parameters
+    hyperparametersALS = MFALSHyperparameters(k=MODEL_K, alpha=0.002, gamma_array=[10]*4, epsilon=0.001)
+    learner = ALSLearner()
 
+    # training model
     trained_model = run_als(rating_dataset, model)
+
+    # cimpute metrices on test set
+    run_metrices(test_dataset, model, 20, size_of_data["test"], 1)
 
 
 if __name__ == "__main__":

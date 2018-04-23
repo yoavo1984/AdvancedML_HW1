@@ -102,15 +102,10 @@ class ALSLearner(Learner):
         for iterations in range(1, 5):
 
             model.generate_prediction_matrix()
-            # run_metrices(train_dataset, model, 20, size_of_data["train"], 0)
-            # run_metrices(test_dataset, model, 20, size_of_data["test"], 1)
+
             self.ALSIteration(train_dataset, model, hyperparameters)
 
             curr_loss = Learner.loss_function(train_dataset['users'], model, hyperparameters)
             prev_loss = curr_loss
 
             # self.write_iteration_error_to_file(iterations, curr_loss)
-
-
-        # run_metrices(train_dataset, model, 20, size_of_data["train"])
-        # run_metrices(test_dataset, model, 20, size_of_data["test"], 1)
