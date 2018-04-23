@@ -252,10 +252,10 @@ def human_readable_output(dataset, model, user_id, h, history_flag):
     oppo_missing_movies_id = new_dict = dict (zip(missing_movies_id.values(),missing_movies_id.keys()))
 
 
-    print ("#"*80 + "\n")
-    print ("Printing history rates for user {0}".format(user_id))
 
     if history_flag == 1:
+        print("Printing history rates for user {0}".format(user_id))
+        print("#" * 80)
         for movie_rating in dataset_users[user_id]:
             movie_id = movie_rating[0]
             movie_rate = movie_rating[1]
@@ -274,8 +274,8 @@ def human_readable_output(dataset, model, user_id, h, history_flag):
 
     # sort by movie id
     top_h_movies = sorted(top_h_movies)
-    print ("#"*80 + "\n")
     print ("Printing top {0} movies for user {1}".format(h, user_id))
+    print ("#"*80)
     for movie_id in top_h_movies[::-1]:
         if movie_id+1 in oppo_missing_movies_id:
             movie_id = oppo_missing_movies_id[movie_id+1]
@@ -283,7 +283,7 @@ def human_readable_output(dataset, model, user_id, h, history_flag):
 
         else:
             print ("{0}".format(movies_dict[movie_id+1][0]))
-    print ("#"*80 + "\n")
+    print ("#"*80)
 
     return
 

@@ -102,7 +102,7 @@ class ALSLearner(Learner):
         for iterations in range(1, 5):
 
             model.generate_prediction_matrix()
-            run_metrices(train_dataset, model, 20, size_of_data["train"], 0)
+            # run_metrices(train_dataset, model, 20, size_of_data["train"], 0)
             # run_metrices(test_dataset, model, 20, size_of_data["test"], 1)
             self.ALSIteration(train_dataset, model, hyperparameters)
 
@@ -111,11 +111,6 @@ class ALSLearner(Learner):
 
             # self.write_iteration_error_to_file(iterations, curr_loss)
 
-        # Human readable
-        #     human_readable_output(train_dataset['users'], dataset, model, 1, h=20)
-        #     human_readable_output(train_dataset['users'], dataset,model, 2, h=20)
-        #     human_readable_output(train_dataset['users'], dataset,model, 3, h=20)
-
 
         # run_metrices(train_dataset, model, 20, size_of_data["train"])
-        run_metrices(test_dataset, model, 20, size_of_data["test"], 1)
+        # run_metrices(test_dataset, model, 20, size_of_data["test"], 1)

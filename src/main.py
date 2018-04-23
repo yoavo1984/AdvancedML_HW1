@@ -82,12 +82,16 @@ def deliverable_four(dataset, model):
 
     print("-- Finished deliverable 4\n")
 
+
 def deliverable_five(dataset, model):
     # Human readable
-    test_dataset = dataset.get_test_dataset()
-    human_readable_output(dataset, model, 1, h=5, flag=0)
-    human_readable_output(dataset, model, 2, h=5, flag=0)
-    human_readable_output(dataset, model, 3, h=5, flag=0)
+    human_readable_output(dataset, model, 1, h=5, history_flag=0)
+    human_readable_output(dataset, model, 2, h=5, history_flag=0)
+    human_readable_output(dataset, model, 3, h=5, history_flag=0)
+    human_readable_output(dataset, model, 100, h=5, history_flag=0)
+    human_readable_output(dataset, model, 200, h=5, history_flag=0)
+    print("-- Finished deliverable 5\n")
+
 
 def run_sgd(dataset, model):
     hyperparametersSGD = MFSGDHyperparameters(k=MODEL_K, alpha=0.02, gamma_array=[0.01, 0.01, 0.01, 0.01], epochs=10)
@@ -102,6 +106,21 @@ def run_als(dataset, model):
 
     learner = ALSLearner()
     learner.LearnModelFromDataUsingALS(dataset, model, hyperparametersALS)
+    return model
+
+def part_six():
+    rating_dataset = dataset.Dataset("../data/movies.dat", "../data/ratings.dat", RATINGS_SIZE)
+
+    train_dataset = rating_dataset.get_train_dataset()
+    mu = dataset.Dataset.get_dataset_mean_rating(train_dataset)
+
+    num_users = rating_dataset.get_number_of_users()
+    num_movies = rating_dataset.get_number_of_movies()
+
+    model = MFModel(num_users, num_movies, k=MODEL_K, mu=mu)
+
+    trained_model = run_als(rating_dataset, model)
+
 
 if __name__ == "__main__":
     rating_dataset = dataset.Dataset("../data/movies.dat", "../data/ratings.dat", RATINGS_SIZE)
@@ -116,9 +135,10 @@ if __name__ == "__main__":
     model = MFModel(num_users, num_movies, k=MODEL_K, mu=mu)
     trained_model = run_als(rating_dataset, model)
 
+    part_six()
 
-    deliverable_two(rating_dataset, model)
-    deliverable_three(rating_dataset, model)
-    deliverable_four(rating_dataset, model)
-    deliverable_five(rating_dataset, trained_model)
+    # deliverable_two(rating_dataset, model)
+    # deliverable_three(rating_dataset, model)
+    # deliverable_four(rating_dataset, model)
+    # deliverable_five(rating_dataset, trained_model)
 
