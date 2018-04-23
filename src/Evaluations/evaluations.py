@@ -241,11 +241,12 @@ def create_metrices_for_user(users_h_ratings, k):
     return
 
 
-def human_readable_output(dataset_users, dataset, model, user_id, h):
+def human_readable_output(dataset, model, user_id, h, history_flag):
     """
     output user history votes with names of items on training set
     output top h items recommended
     """
+    dataset_users = dataset.get_train_dataset()['users']
     movies_dict = data_loader.generate_movies_data_dict("../data/movies.dat")
     missing_movies_id = dataset.missing_movies_ids_dict
     oppo_missing_movies_id = new_dict = dict (zip(missing_movies_id.values(),missing_movies_id.keys()))
@@ -254,16 +255,17 @@ def human_readable_output(dataset_users, dataset, model, user_id, h):
     print ("#"*80 + "\n")
     print ("Printing history rates for user {0}".format(user_id))
 
-    for movie_rating in dataset_users[user_id]:
-        movie_id = movie_rating[0]
-        movie_rate = movie_rating[1]
-        if movie_id in oppo_missing_movies_id:
-            movie_id = oppo_missing_movies_id[movie_id]
+    if history_flag == 1:
+        for movie_rating in dataset_users[user_id]:
+            movie_id = movie_rating[0]
+            movie_rate = movie_rating[1]
+            if movie_id in oppo_missing_movies_id:
+                movie_id = oppo_missing_movies_id[movie_id]
 
-        movie_name = movies_dict[movie_id][0]
-        movie_rate = movie_rate
+            movie_name = movies_dict[movie_id][0]
+            movie_rate = movie_rate
 
-        print ("{0}:{1}".format(movie_name, movie_rate))
+            print ("{0}:{1}".format(movie_name, movie_rate))
 
     predictions = model.get_user_predictions(user_id)
     # last index is the movie name with the highest rating
