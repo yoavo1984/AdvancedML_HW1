@@ -13,7 +13,7 @@ import dataset
 # POSSIBLE_D = [2,4,10,20,40,50,70,100,200]
 POSSIBLE_D = [2,4,10,20,40]
 MODEL_K = 10
-RATINGS_SIZE = 5000
+RATINGS_SIZE = 500000
 RECALL_K = 10
 
 def deliverable_two(dataset, model):
@@ -88,8 +88,8 @@ def deliverable_five(dataset, model):
     human_readable_output(dataset, model, 1, h=5, history_flag=0)
     human_readable_output(dataset, model, 2, h=5, history_flag=0)
     human_readable_output(dataset, model, 3, h=5, history_flag=0)
-    human_readable_output(dataset, model, 100, h=5, history_flag=0)
-    human_readable_output(dataset, model, 200, h=5, history_flag=0)
+    human_readable_output(dataset, model, 34, h=5, history_flag=0)
+    human_readable_output(dataset, model, 35, h=5, history_flag=0)
     print("-- Finished deliverable 5\n")
 
 
@@ -122,21 +122,28 @@ def part_six():
     size_of_data = {}
     size_of_data["train"] = rating_dataset.calculate_size_of_data_set(train_dataset["users"])
     size_of_data["test"] = rating_dataset.calculate_size_of_data_set(test_dataset["users"])
-
+    print ("Finished loading and splitting data"
+           "")
     # define model parameters
     model = MFModel(num_users, num_movies, k=MODEL_K, mu=mu)
     hyperparametersALS = MFALSHyperparameters(k=MODEL_K, alpha=0.002, gamma_array=[10]*4, epsilon=0.001)
     learner_six = ALSLearner()
+    print ("Finished defining model parameters")
 
     # training model
+    # should output train and test error to file
+    start = time.time()
     learner_six.LearnModelFromDataUsingALS(rating_dataset, model, hyperparametersALS)
+    duration = time.time() - start
+    print ("Finished training model, took {} time".format(duration))
 
-    # cimpute metrices on test set
+    # compute metrices on test set
     run_metrices(test_dataset, model, 2, size_of_data["test"], 0)
     run_metrices(test_dataset, model, 10, size_of_data["test"], 0)
+    run_metrices(train_dataset, model, 10, size_of_data["test"], 0)
 
     # print to file (hyper, metrices, time of training)
-    pass
+    print ("Finished output to file\n")
 
 if __name__ == "__main__":
     rating_dataset = dataset.Dataset("../data/movies.dat", "../data/ratings.dat", RATINGS_SIZE)
@@ -148,14 +155,13 @@ if __name__ == "__main__":
     num_users = rating_dataset.get_number_of_users()
     num_movies = rating_dataset.get_number_of_movies()
 
-
     part_six()
 
-    
-    # deliverable_two(rating_dataset, model)
-    # deliverable_three(rating_dataset, model)
-    # deliverable_four(rating_dataset, model)
-    # model = MFModel(num_users, num_movies, k=MODEL_K, mu=mu)
-    # trained_model = run_als(rating_dataset, model)
-    # deliverable_five(rating_dataset, trained_model)
+    model = MFModel(num_users, num_movies, k=MODEL_K, mu=mu)
+    trained_model = run_als(rating_dataset, model)
+
+    deliverable_two(rating_dataset, model)
+    deliverable_three(rating_dataset, model)
+    deliverable_four(rating_dataset, model)
+    deliverable_five(rating_dataset, trained_model)
 

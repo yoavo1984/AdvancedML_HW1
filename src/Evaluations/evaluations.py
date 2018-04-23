@@ -77,7 +77,7 @@ def create_ground_truth(user_data, k):
         sorted_above_4 = sorted_by_rate[-25::]
 
     # trying to take only k movies for ground truth
-    sorted_above_4 = sorted_by_rate[-k::]
+    # sorted_above_4 = sorted_by_rate[-k::]
 
     # sort by movie id
     sorted_above_4 = sorted(sorted_above_4, key=lambda tup: tup[0])
@@ -289,14 +289,13 @@ def human_readable_output(dataset, model, user_id, h, history_flag):
 
 
 def run_metrices(dataset, model, k, size_of_data, output_ranked_items):
-    print ("--- Running metrices for " + dataset["name"] + " ---")
+    print ("--- Running metrices for " + dataset["name"] + " with k = {}".format(k) + " ---")
     mpr = mean_percentile_rank(dataset["users"], model, k)
     se_score = se(dataset["users"], model)
     rmse_score = rmse(dataset["users"], model, size_of_data)
     users_prec_k, prec_k, users_recall_k, reca_k = calc_precision_recall_k(dataset["users"] , model, k)
     mean_avg_precision_lecture, mean_avg_precision_internet = map(dataset["users"], model)
-    print ("MPR:{}, SE:{}, RMSE:{}\nP@k:{}, R@k:{}\nMAP_Lecture:{}, MAP_Internet:{}".format(mpr, se_score, rmse_score, prec_k, reca_k, mean_avg_precision_lecture, mean_avg_precision_internet))
-    print ("#"*80 + "\n")
+    print ("MPR:{}, SE:{}, RMSE:{}\nP@k:{}, R@k:{}\nMAP_Lecture:{}, MAP_Internet:{}\n".format(mpr, se_score, rmse_score, prec_k, reca_k, mean_avg_precision_lecture, mean_avg_precision_internet))
 
     if output_ranked_items == 1:
         print_ranked_items(model, dataset["users"], 2)
