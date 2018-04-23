@@ -7,12 +7,14 @@ from Model.mf_model import  MFModel
 from Model.hyper_parameters import *
 from Learning.sgd_learner import SGDLearner
 from Learning.als_learner import ALSLearner
-from Evaluations.evaluations import rmse, recall_k
+from Evaluations.evaluations import *
 import dataset
 
-POSSIBLE_D = [2,4,10,20,40,50,70,100,200]
+# POSSIBLE_D = [2,4,10,20,40,50,70,100,200]
+POSSIBLE_D = [2,4,10,20,40]
 MODEL_K = 10
-RATINGS_SIZE = 100000
+RATINGS_SIZE = 5000
+RECALL_K = 10
 
 def deliverable_two(dataset, model):
     hyperparametersALS = MFALSHyperparameters(k=MODEL_K, alpha=0.002, gamma_array=[0.2, 0.2, 0.2, 0.2], epsilon=0.001)
@@ -31,13 +33,15 @@ def deliverable_two(dataset, model):
             learner.LearnModelFromDataUsingALS(dataset, model, hyperparametersALS)
 
             metric_one = rmse(test_dataset['users'], model, test_size)
-            _, metric_two = recall_k(test_dataset['users'], test_dataset['movies'], model, 10)
+            _, metric_two = recall_k(test_dataset['users'], model, RECALL_K)
 
             file.write("{}::{}::{}\n".format(value, round(metric_one,2), round(metric_two,2)))
 
+        print("-- Finished deliverable 2\n")
+
 
 def deliverable_three(dataset, model):
-    hyperparametersALS = MFALSHyperparameters(k=MODEL_K, alpha=0.002, gamma_array=[0.2, 0.2, 0.2, 0.2], epsilon=0.001)
+    hyperparametersALS = MFALSHyperparameters(k=MODEL_K, alpha=0.002, gamma_array=[10]*4, epsilon=0.001)
     learner = ALSLearner()
 
     test_dataset = dataset.get_test_dataset()
@@ -53,14 +57,14 @@ def deliverable_three(dataset, model):
             learner.LearnModelFromDataUsingALS(dataset, model, hyperparametersALS)
 
             metric_one = rmse(test_dataset['users'], model, test_size)
-            _, metric_two = recall_k(test_dataset['users'], test_dataset['movies'], model, 10)
+            _, metric_two = recall_k(test_dataset['users'], model, RECALL_K)
 
             file.write("{}::{}::{}\n".format(d, round(metric_one,2), round(metric_two,2)))
 
-    print("-- Finished deliverable 3")
+    print("-- Finished deliverable 3\n")
 
 def deliverable_four(dataset, model):
-    hyperparametersALS = MFALSHyperparameters(k=MODEL_K, alpha=0.002, gamma_array=[0.2, 0.2, 0.2, 0.2], epsilon=0.001)
+    hyperparametersALS = MFALSHyperparameters(k=MODEL_K, alpha=0.002, gamma_array=[10]*4, epsilon=0.001)
     learner = ALSLearner()
 
     with open('deliverable/deliverable_4_data', 'w') as file:
@@ -76,7 +80,14 @@ def deliverable_four(dataset, model):
 
             file.write("{}::{}\n".format(d, round(total_time,2)))
 
-    print("-- Finished deliverable 4")
+    print("-- Finished deliverable 4\n")
+
+def deliverable_five(dataset, model):
+    # Human readable
+    test_dataset = dataset.get_test_dataset()
+    human_readable_output(dataset, model, 1, h=5, flag=0)
+    human_readable_output(dataset, model, 2, h=5, flag=0)
+    human_readable_output(dataset, model, 3, h=5, flag=0)
 
 def run_sgd(dataset, model):
     hyperparametersSGD = MFSGDHyperparameters(k=MODEL_K, alpha=0.02, gamma_array=[0.01, 0.01, 0.01, 0.01], epochs=10)
@@ -84,6 +95,7 @@ def run_sgd(dataset, model):
     learner = SGDLearner()
     learner.LearnModelFromDataUsingSGD(dataset, model, hyperparametersSGD)
 
+    return model
 
 def run_als(dataset, model):
     hyperparametersALS = MFALSHyperparameters(k=MODEL_K, alpha=0.002, gamma_array=[0.2, 0.2, 0.2, 0.2], epsilon=0.001)
@@ -102,12 +114,11 @@ if __name__ == "__main__":
     num_movies = rating_dataset.get_number_of_movies()
 
     model = MFModel(num_users, num_movies, k=MODEL_K, mu=mu)
+    trained_model = run_als(rating_dataset, model)
 
-    run_als(rating_dataset, model)
-    # run_sgd(rating_dataset, model)
-    # deliverable_two(rating_dataset, model)
 
     deliverable_two(rating_dataset, model)
-    # deliverable_three(rating_dataset, model)
-    # deliverable_four(rating_dataset, model)
+    deliverable_three(rating_dataset, model)
+    deliverable_four(rating_dataset, model)
+    deliverable_five(rating_dataset, trained_model)
 
