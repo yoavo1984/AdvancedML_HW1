@@ -14,7 +14,7 @@ class Learner(object):
 
     def __init__(self):
         self.name = "Learner"
-        self.log_file = ""
+        self.log_file = {}
 
     @staticmethod
     def loss_function(dataset, model, hyperparameters):
@@ -35,20 +35,20 @@ class Learner(object):
 
         return sum
 
-    def open_log_file(self ,model, hyperparameters):
-        file_name = "{}_k-{}_l-{}".format(self.name, hyperparameters.k, hyperparameters.gamma_array[0])
-        self.log_file = open(file_name, 'w')
-        self.log_file.write("#"*10 +"\t" + file_name + "\t" +"#"*10 + "\n\n")
+    def open_log_file(self ,log_name ,model, hyperparameters):
+        file_name = "{}_k-{}_l-{}".format(log_name, hyperparameters.k, hyperparameters.gamma_array[0])
+        self.log_file[log_name] = open(file_name, 'w')
+        self.log_file[log_name].write("#"*10 +"\t" + file_name + "\t" +"#"*10 + "\n\n")
 
-    def write_iteration_error_to_file(self, iteration, error):
-        content = "Iteration {} : {}\n".format(iteration, error)
-        self.log_file.write(content)
+    def write_iteration_error_to_file(self, log_file, iteration, error):
+        content = "{}::{}\n".format(iteration, error)
+        self.log_file[log_file].write(content)
 
         if DEBUG:
             print(content)
 
-    def close_log_file(self):
-        self.log_file.close()
+    def close_log_file(self, log_file):
+        self.log_file[log_file].close()
 
 
 if __name__ == "__main__":
