@@ -52,7 +52,7 @@ class Learner(object):
 
 
 if __name__ == "__main__":
-    mock_hyper = MFHyperparameters(k=4, alpha=0.1, gamma_array=[1]);
+    mock_hyper = MFHyperparameters(k=4, alpha=0.1, lambda_array=[1]);
     learner = Learner()
     learner.open_log_file("model", mock_hyper)
     learner.write_error_to_file("iteration 1 : error 100000")

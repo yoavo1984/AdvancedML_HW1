@@ -1,5 +1,5 @@
 class MFHyperparameters:
-    def __init__(self, d, gamma_array):
+    def __init__(self, d, lambda_array):
         """
         Bn Bias
         U users matrix
@@ -7,13 +7,13 @@ class MFHyperparameters:
         m users index
         n items index
         """
-        self.gamma_array = gamma_array
+        self.gamma_array = lambda_array
         self.d = d
 
 
 class MFALSHyperparameters(MFHyperparameters):
-    def __init__(self, d, gamma_array, epsillon):
-        super(MFALSHyperparameters, self).__init__(d, gamma_array)
+    def __init__(self, d, lambda_array, epsillon):
+        super(MFALSHyperparameters, self).__init__(d, lambda_array)
         self.epsillon = epsillon
 
     def __str__(self):
@@ -25,8 +25,8 @@ class MFALSHyperparameters(MFHyperparameters):
                "".format(self.d, self.gamma_array, self.epsillon)
 
 class MFSGDHyperparameters(MFHyperparameters):
-    def __init__(self, d, gamma_array, alpha, epochs):
-        super(MFSGDHyperparameters, self).__init__(d, gamma_array)
+    def __init__(self, d, lambda_array, alpha, epochs):
+        super(MFSGDHyperparameters, self).__init__(d, lambda_array)
         self.epochs = epochs
         self.alpha = alpha
 
