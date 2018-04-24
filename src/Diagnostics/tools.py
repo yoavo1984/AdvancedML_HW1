@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 from Diagnostics.pdf_generator import PDFGenerator
 
+DELIVERABLE_2_FILE = "../deliverable/deliverable_2_data"
 DELIVERABLE_3_FILE = "../deliverable/deliverable_3_data"
 DELIVERABLE_4_FILE = "../deliverable/deliverable_4_data"
 
@@ -76,6 +77,24 @@ def parse_double_plot_file(file_name):
             z_values.append(z)
 
     return x_values, y_values, z_values
+
+def generate_deliverable_two():
+    d_values, m1_values, m2_values = parse_double_plot_file(DELIVERABLE_2_FILE)
+    plt.plot(d_values, m1_values)
+    plt.ylabel("Rmse")
+    plt.xlabel("log lamda value")
+
+    plt.xscale('log')
+    plt.show()
+    plt.clf()
+
+    plt.plot(d_values, m2_values)
+    plt.ylabel("Recall@10")
+    plt.xlabel("log lamda value")
+
+    plt.xscale('log')
+    plt.show()
+    plt.clf()
 
 def generate_deliverable_three():
     d_values, m1_values, m2_values = parse_double_plot_file(DELIVERABLE_3_FILE)

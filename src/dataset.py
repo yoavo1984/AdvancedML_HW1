@@ -1,5 +1,5 @@
-import data_loader
-import shuffler
+from utils import data_loader, shuffler
+
 
 class Dataset():
     def __init__(self, movie_file_path, users_file_path, number_of_items=-1):

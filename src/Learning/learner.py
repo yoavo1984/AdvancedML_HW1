@@ -3,7 +3,7 @@ from  Model.hyper_parameters import MFHyperparameters
 
 # real imorts
 import numpy as np
-DEBUG = True
+DEBUG = False
 
 U_INDEX = 0
 V_INDEX = 1
@@ -36,7 +36,7 @@ class Learner(object):
         return sum
 
     def open_log_file(self ,log_name ,model, hyperparameters):
-        file_name = "{}_k-{}_l-{}".format(log_name, hyperparameters.k, hyperparameters.gamma_array[0])
+        file_name = "{}_k-{}_l-{}".format(log_name, hyperparameters.d, hyperparameters.gamma_array[0])
         self.log_file[log_name] = open(file_name, 'w')
         self.log_file[log_name].write("#"*10 +"\t" + file_name + "\t" +"#"*10 + "\n\n")
 

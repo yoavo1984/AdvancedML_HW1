@@ -1,23 +1,22 @@
-import numpy as np
 import time
 
-import data_loader
-import shuffler
-from Model.mf_model import  MFModel
-from Model.hyper_parameters import *
-from Learning.sgd_learner import SGDLearner
-from Learning.als_learner import ALSLearner
-from Evaluations.evaluations import *
 import dataset
+import utils.configuration_parser as configuration_parser
+
+from Evaluations.evaluations import *
+from Learning.als_learner import ALSLearner
+from Learning.sgd_learner import SGDLearner
+from Model.hyper_parameters import *
+from Model.mf_model import MFModel
 
 # POSSIBLE_D = [2,4,10,20,40,50,70,100,200]
 POSSIBLE_D = [2,4,10,20,40]
 MODEL_K = 10
-RATINGS_SIZE = 500000
+RATINGS_SIZE = 5000
 RECALL_K = 10
 
 def deliverable_two(dataset, model):
-    hyperparametersALS = MFALSHyperparameters(k=MODEL_K, alpha=0.002, gamma_array=[0.2, 0.2, 0.2, 0.2], epsilon=0.001)
+    hyperparametersALS = MFALSHyperparameters(d=MODEL_K, alpha=0.002, gamma_array=[0.2, 0.2, 0.2, 0.2], epsilon=0.001)
     learner = ALSLearner()
 
     test_dataset = dataset.get_test_dataset()
@@ -41,7 +40,7 @@ def deliverable_two(dataset, model):
 
 
 def deliverable_three(dataset, model):
-    hyperparametersALS = MFALSHyperparameters(k=MODEL_K, alpha=0.002, gamma_array=[10]*4, epsilon=0.001)
+    hyperparametersALS = MFALSHyperparameters(d=MODEL_K, alpha=0.002, gamma_array=[10]*4, epsillon=0.001)
     learner = ALSLearner()
 
     test_dataset = dataset.get_test_dataset()
@@ -49,8 +48,8 @@ def deliverable_three(dataset, model):
 
     with open('deliverable/deliverable_3_data', 'w') as file:
         for d in POSSIBLE_D:
-            model.k = d
-            hyperparametersALS.k = d
+            model.d = d
+            hyperparametersALS.d = d
 
             model.reset_model()
 
@@ -64,13 +63,13 @@ def deliverable_three(dataset, model):
     print("-- Finished deliverable 3\n")
 
 def deliverable_four(dataset, model):
-    hyperparametersALS = MFALSHyperparameters(k=MODEL_K, alpha=0.002, gamma_array=[10]*4, epsilon=0.001)
+    hyperparametersALS = MFALSHyperparameters(d=MODEL_K, alpha=0.002, gamma_array=[10]*4, epsillon=0.001)
     learner = ALSLearner()
 
     with open('deliverable/deliverable_4_data', 'w') as file:
         for d in POSSIBLE_D:
-            model.k = d
-            hyperparametersALS.k = d
+            model.d = d
+            hyperparametersALS.d = d
             model.reset_model()
 
             # Time measurement.
@@ -94,7 +93,7 @@ def deliverable_five(dataset, model):
 
 
 def run_sgd(dataset, model):
-    hyperparametersSGD = MFSGDHyperparameters(k=MODEL_K, alpha=0.02, gamma_array=[0.01, 0.01, 0.01, 0.01], epochs=10)
+    hyperparametersSGD = MFSGDHyperparameters(d=MODEL_K, alpha=0.02, gamma_array=[0.01, 0.01, 0.01, 0.01], epochs=10)
 
     learner = SGDLearner()
     learner.LearnModelFromDataUsingSGD(dataset, model, hyperparametersSGD)
@@ -102,16 +101,25 @@ def run_sgd(dataset, model):
     return model
 
 def run_als(dataset, model):
-    hyperparametersALS = MFALSHyperparameters(k=MODEL_K, alpha=0.002, gamma_array=[0.2, 0.2, 0.2, 0.2], epsilon=0.001)
+    hyperparametersALS = MFALSHyperparameters(d=MODEL_K, alpha=0.002, gamma_array=[12, .5, 12, .5], epsillon=0.001)
 
-    learner = ALSLearner()
-    learner.LearnModelFromDataUsingALS(dataset, model, hyperparametersALS)
+    for d in range (14, 15):
+        model.d = d
+        hyperparametersALS.d = d
+        model.reset_model()
+
+        learner = ALSLearner()
+        learner.LearnModelFromDataUsingALS(dataset, model, hyperparametersALS, True)
+        print ("Rmse for {} is = {}".format(k, rmse(dataset.get_test_dataset()['users'], model)))
+
     return model
 
 def part_six():
     print ("Running part 6 - Main Flow")
     # loading and splitting data
     rating_dataset = dataset.Dataset("../data/movies.dat", "../data/ratings.dat", RATINGS_SIZE)
+    configuration_dict = configuration_parser.parse_configuration_file("configuration")
+
     train_dataset = rating_dataset.get_train_dataset()
     test_dataset = rating_dataset.get_test_dataset()
 
@@ -122,46 +130,65 @@ def part_six():
     size_of_data = {}
     size_of_data["train"] = rating_dataset.calculate_size_of_data_set(train_dataset["users"])
     size_of_data["test"] = rating_dataset.calculate_size_of_data_set(test_dataset["users"])
-    print ("Finished loading and splitting data"
-           "")
-    # define model parameters
-    model = MFModel(num_users, num_movies, k=MODEL_K, mu=mu)
-    hyperparametersALS = MFALSHyperparameters(k=MODEL_K, alpha=0.002, gamma_array=[10]*4, epsilon=0.001)
-    learner_six = ALSLearner()
-    print ("Finished defining model parameters")
+    print ("Finished loading and splitting data")
 
-    # training model
-    # should output train and test error to file
+    # Training model
     start = time.time()
-    learner_six.LearnModelFromDataUsingALS(rating_dataset, model, hyperparametersALS)
+    model = MFModel(num_users, num_movies, d=configuration_dict['d'], mu=mu)
+    if configuration_dict['algorithm'] == "als":
+        hyperparameters = MFALSHyperparameters(d=configuration_dict['d'],
+                                               gamma_array=configuration_dict['lambda'],
+                                               epsillon=configuration_dict['epsillon'])
+        learner_six = ALSLearner()
+        learner_six.LearnModelFromDataUsingALS(rating_dataset, model, hyperparameters)
+    else :
+        hyperparameters = MFSGDHyperparameters(d=configuration_dict['d'],
+                                               gamma_array=configuration_dict['lambda'],
+                                               epochs=configuration_dict['epochs'],
+                                               alpha=configuration_dict['alpha'])
+        learner_six = SGDLearner()
+        learner_six.LearnModelFromDataUsingSGD(rating_dataset, model, hyperparameters)
     duration = time.time() - start
-    print ("Finished training model, took {} time".format(duration))
 
     # compute metrices on test set
-    run_metrices(test_dataset, model, 2, size_of_data["test"], 0)
-    run_metrices(test_dataset, model, 10, size_of_data["test"], 0)
-    run_metrices(train_dataset, model, 10, size_of_data["test"], 0)
+    file_output = get_part_six_metrices_output(test_dataset, model)
 
     # print to file (hyper, metrices, time of training)
-    print ("Finished output to file\n")
+    with open("output", "w") as file:
+        file.write("Algorithm\n"
+                   "---------\n"
+                   "{}\n\n".format(configuration_dict['algorithm'].upper()))
+
+        file.write(str(hyperparameters))
+        file.write(file_output)
+
+        file.write("Running Time:\n"
+                   "-------------\n"
+                   "{}".format(round(duration,4)))
+
+    print("Finished output to file\n")
 
 if __name__ == "__main__":
-    rating_dataset = dataset.Dataset("../data/movies.dat", "../data/ratings.dat", RATINGS_SIZE)
-
-    # Calculate mean.
-    train_dataset = rating_dataset.get_train_dataset()
-    mu = dataset.Dataset.get_dataset_mean_rating(train_dataset)
-
-    num_users = rating_dataset.get_number_of_users()
-    num_movies = rating_dataset.get_number_of_movies()
-
     part_six()
 
-    model = MFModel(num_users, num_movies, k=MODEL_K, mu=mu)
-    trained_model = run_als(rating_dataset, model)
+    # rating_dataset = dataset.Dataset("../data/movies.dat", "../data/ratings.dat", RATINGS_SIZE)
+    #
+    # # Calculate mean.
+    # train_dataset = rating_dataset.get_train_dataset()
+    # mu = dataset.Dataset.get_dataset_mean_rating(train_dataset)
+    #
+    # num_users = rating_dataset.get_number_of_users()
+    # num_movies = rating_dataset.get_number_of_movies()
+    #
+    # model = MFModel(num_users, num_movies, k=MODEL_K, mu=mu)
 
-    deliverable_two(rating_dataset, model)
-    deliverable_three(rating_dataset, model)
-    deliverable_four(rating_dataset, model)
-    deliverable_five(rating_dataset, trained_model)
+    # run_als(rating_dataset, model)
+
+    # model = MFModel(num_users, num_movies, k=MODEL_K, mu=mu)
+    # trained_model = run_als(rating_dataset, model)
+    #
+    # deliverable_two(rating_dataset, model)
+    # deliverable_three(rating_dataset, model)
+    # deliverable_four(rating_dataset, model)
+    # deliverable_five(rating_dataset, trained_model)
 

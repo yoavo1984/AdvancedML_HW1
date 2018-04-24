@@ -1,6 +1,8 @@
 import math
+
 import numpy as np
-import data_loader
+
+from utils import data_loader
 
 
 def se(dataset, model):
@@ -15,9 +17,10 @@ def se(dataset, model):
     return sum
 
 
-def rmse(dataset, model, size_of_data):
+def rmse(dataset, model, size_of_data=0):
     # calculate squared error
     sum = 0
+    size_of_data = 0
     # need to compute one time and reuse
 
     for user_id in dataset:
@@ -26,6 +29,7 @@ def rmse(dataset, model, size_of_data):
             movie_true_rating = movie_rate[1]
             prediction = model.predict(user_id, movie_id)
             sum += pow(movie_true_rating - prediction, 2)
+            size_of_data += 1
 
     # take the mean
     sum = sum / size_of_data
@@ -36,7 +40,7 @@ def rmse(dataset, model, size_of_data):
     return sum
 
 
-def mean_percentile_rank(dataset_users, model, k):
+def mean_percentile_rank(dataset_users, model):
     """
     MPR = sum(true rank*predicted rank percentile) / sum of true ranks
     """
@@ -53,7 +57,7 @@ def mean_percentile_rank(dataset_users, model, k):
             # the array percentiles indexes are the movies, the values are the percentile of the movie.
             percentiles[movie_id] = percentile
 
-        ground_truth = create_ground_truth(dataset_users[user_id], k)
+        ground_truth = create_ground_truth(dataset_users[user_id])
 
         # for each movie count in ground truth (size k) add that movie rank
         sum_percentiles = 0
@@ -68,7 +72,7 @@ def mean_percentile_rank(dataset_users, model, k):
     return np.mean(users_k)
 
 
-def create_ground_truth(user_data, k):
+def create_ground_truth(user_data):
     sorted_by_rate = sorted(user_data, key=lambda tup: tup[1])
     # keeping above 4 or 3.5 sometimes gives 0 movies...
     sorted_above_4 = [item for item in sorted_by_rate if item[1] >= 4]
@@ -126,7 +130,7 @@ def calc_precision_recall_k(dataset_users, model, k):
 
     for user_id in dataset_users:
         # print (user_id)
-        ground_truth_set = create_ground_truth(dataset_users[user_id], k)
+        ground_truth_set = create_ground_truth(dataset_users[user_id])
         ground_truth_set = set(ground_truth_set)
 
         # maybe iterate over all movies? keep data of all movies??
@@ -157,7 +161,7 @@ def single_user_precision_recall(dataset_users, user_id, model, k):
     """
 
     # print (user_id)
-    ground_truth_set = create_ground_truth(dataset_users[user_id], k)
+    ground_truth_set = create_ground_truth(dataset_users[user_id])
     ground_truth_set = set(ground_truth_set)
 
     predicted_set = create_predicted(dataset_users, model, user_id, k)
@@ -295,10 +299,41 @@ def run_metrices(dataset, model, k, size_of_data, output_ranked_items):
     rmse_score = rmse(dataset["users"], model, size_of_data)
     users_prec_k, prec_k, users_recall_k, reca_k = calc_precision_recall_k(dataset["users"] , model, k)
     mean_avg_precision_lecture, mean_avg_precision_internet = map(dataset["users"], model)
-    print ("MPR:{}, SE:{}, RMSE:{}\nP@k:{}, R@k:{}\nMAP_Lecture:{}, MAP_Internet:{}\n".format(mpr, se_score, rmse_score, prec_k, reca_k, mean_avg_precision_lecture, mean_avg_precision_internet))
+    print ("MPR:{}, SE:{}, RMSE:{}\nP@k:{}, R@k:{}\nMAP_Lecture:{}, MAP_Internet:{}\n".format(mpr,
+                                                                                              se_score,
+                                                                                              rmse_score,
+                                                                                              prec_k,
+                                                                                              reca_k,
+                                                                                              mean_avg_precision_lecture,
+                                                                                              mean_avg_precision_internet))
 
     if output_ranked_items == 1:
         print_ranked_items(model, dataset["users"], 2)
+
+def get_part_six_metrices_output(dataset, model):
+    rmse_s                   = rmse(dataset["users"], model)
+    mpr                      = mean_percentile_rank(dataset["users"], model)
+    _, prec_two, _, reca_two = calc_precision_recall_k(dataset["users"], model, 2)
+    _, prec_ten, _, reca_ten = calc_precision_recall_k(dataset["users"], model, 10)
+    mean_avg_precision, _    = map(dataset["users"], model)
+
+    return "Evaluation Metrics:\n" \
+           "-------------------\n" \
+           "- RMSE = {}\n" \
+           "- MPR  = {}\n" \
+           "- P@2  = {}\n" \
+           "- P@10 = {}\n" \
+           "- R@2  = {}\n" \
+           "- R@10 = {}\n" \
+           "- MAP  = {}\n\n" \
+           "".format(round(rmse_s,4),
+                     round(mpr,4),
+                     round(prec_two,4),
+                     round(prec_two,4),
+                     round(prec_ten,4),
+                     round(reca_two,4),
+                     round(reca_ten,4))
+
 
 
 if __name__ == "__main__":

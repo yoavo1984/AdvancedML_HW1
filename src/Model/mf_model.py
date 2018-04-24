@@ -1,11 +1,11 @@
 import numpy as np
 
 class MFModel():
-    def __init__(self, num_users, num_items, k, mu):
+    def __init__(self, num_users, num_items, d, mu):
         # Saving model parameters.
         self.num_users = num_users
         self.num_items = num_items
-        self.k = k
+        self.d = d
         self.mu = mu
 
         # Initializing object variables.
@@ -19,9 +19,9 @@ class MFModel():
         self.reset_model()
 
     def reset_model(self):
-        self.u = np.random.normal(scale=0.25, size=(self.num_users, self.k)).round(2)
+        self.u = np.random.normal(scale=0.25, size=(self.num_users, self.d)).round(2)
 
-        self.v = np.random.normal(scale=0.25, size=(self.num_items, self.k)).round(2)
+        self.v = np.random.normal(scale=0.25, size=(self.num_items, self.d)).round(2)
 
         self.b_user = np.random.normal(scale=0.25, size=self.num_users).round(2)
 
