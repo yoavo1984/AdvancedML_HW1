@@ -311,6 +311,7 @@ def run_metrices(dataset, model, k, size_of_data, output_ranked_items):
         print_ranked_items(model, dataset["users"], 2)
 
 def get_part_six_metrices_output(dataset, model):
+    model.generate_prediction_matrix()
     rmse_s                   = rmse(dataset["users"], model)
     mpr                      = mean_percentile_rank(dataset["users"], model)
     _, prec_two, _, reca_two = calc_precision_recall_k(dataset["users"], model, 2)

@@ -127,9 +127,6 @@ def part_six():
     num_users = rating_dataset.get_number_of_users()
     num_movies = rating_dataset.get_number_of_movies()
 
-    size_of_data = {}
-    size_of_data["train"] = rating_dataset.calculate_size_of_data_set(train_dataset["users"])
-    size_of_data["test"] = rating_dataset.calculate_size_of_data_set(test_dataset["users"])
     print ("Finished loading and splitting data")
 
     # Training model
@@ -157,14 +154,14 @@ def part_six():
     with open("output", "w") as file:
         file.write("Algorithm\n"
                    "---------\n"
-                   "{}\n\n".format(configuration_dict['algorithm'].upper()))
+                   "- {}\n\n".format(configuration_dict['algorithm'].upper()))
 
         file.write(str(hyperparameters))
         file.write(file_output)
 
         file.write("Running Time:\n"
                    "-------------\n"
-                   "{}".format(round(duration,4)))
+                   "- {}".format(round(duration,4)))
 
     print("Finished output to file\n")
 

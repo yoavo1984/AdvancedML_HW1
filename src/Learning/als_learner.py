@@ -96,10 +96,6 @@ class ALSLearner(Learner):
         prev_loss = np.inf
         iterations = 0
 
-        size_of_data={}
-        size_of_data["train"] = dataset.calculate_size_of_data_set(train_dataset["users"])
-        size_of_data["test"] = dataset.calculate_size_of_data_set(test_dataset["users"])
-
         self.open_log_file(TRAIN, model, hyperparameters)
         self.open_log_file(TEST, model, hyperparameters)
 
