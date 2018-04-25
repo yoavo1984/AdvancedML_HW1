@@ -1,0 +1,12 @@
+# Pick the algorithm you want to run (sgd/als).
+algorithm : sgd
+# Set d (latent_variable)
+d : 14
+# set lambda array (4 values)
+lambda : 0.1, 0.1, 0.1, 0.1
+# set epsillon (if running als)
+epsillon : 0.01
+# set alpha (if running sgd)
+alpha : 0.02
+# set epochs (if running sgd)
+epochs : 10
