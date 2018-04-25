@@ -7,7 +7,7 @@ class MFHyperparameters:
         m users index
         n items index
         """
-        self.gamma_array = lambda_array
+        self.lambda_array = lambda_array
         self.d = d
 
 
@@ -22,7 +22,7 @@ class MFALSHyperparameters(MFHyperparameters):
                " - D        = {}\n" \
                " - Lamda    = {}\n" \
                " - Epsillon = {}\n\n" \
-               "".format(self.d, self.gamma_array, self.epsillon)
+               "".format(self.d, self.lambda_array, self.epsillon)
 
 class MFSGDHyperparameters(MFHyperparameters):
     def __init__(self, d, lambda_array, alpha, epochs):
@@ -37,4 +37,4 @@ class MFSGDHyperparameters(MFHyperparameters):
                " - Lamda    = {}\n" \
                " - alpha    = {}\n" \
                " - epochs   = {}\n\n" \
-               "".format(self.d, self.gamma_array, self.alpha, self.epochs)
+               "".format(self.d, self.lambda_array, self.alpha, self.epochs)

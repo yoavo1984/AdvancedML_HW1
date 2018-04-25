@@ -5,6 +5,9 @@ DELIVERABLE_2_FILE = "../deliverable/deliverable_2_data"
 DELIVERABLE_3_FILE = "../deliverable/deliverable_3_data"
 DELIVERABLE_4_FILE = "../deliverable/deliverable_4_data"
 
+
+# =========================================== Helpers ==================================================================
+
 def plot_train_and_test_vs_iteration(name, train_data, test_data, save=True):
     # Plot the test and the train data errors.
     plt.plot(test_data)
@@ -64,7 +67,7 @@ def parse_plot_file(file_name):
 
     return x_values, y_values
 
-def parse_double_plot_file(file_name):
+def parse_double_plot_file(file_name,):
     x_values = []
     y_values = []
     z_values = []
@@ -78,6 +81,13 @@ def parse_double_plot_file(file_name):
 
     return x_values, y_values, z_values
 
+
+# =========================================== Deliverables generation ==================================================
+def generate_deliverable_one():
+    file_name = "{}_test_train_error_plot".format()
+    plt.savefig(file_name)
+    plt.clf()
+
 def generate_deliverable_two():
     d_values, m1_values, m2_values = parse_double_plot_file(DELIVERABLE_2_FILE)
     plt.plot(d_values, m1_values)
@@ -85,7 +95,9 @@ def generate_deliverable_two():
     plt.xlabel("log lamda value")
 
     plt.xscale('log')
-    plt.show()
+
+    file_name = "deliverable_two_metric_one"
+    plt.savefig(file_name)
     plt.clf()
 
     plt.plot(d_values, m2_values)
@@ -93,7 +105,8 @@ def generate_deliverable_two():
     plt.xlabel("log lamda value")
 
     plt.xscale('log')
-    plt.show()
+    file_name = "deliverable_two_metric_two"
+    plt.savefig(file_name)
     plt.clf()
 
 def generate_deliverable_three():
@@ -103,14 +116,16 @@ def generate_deliverable_three():
     plt.ylabel("Rmse")
     plt.xlabel("D(latent variables) value")
 
-    plt.show()
+    file_name = "deliverable_three_metric_one"
+    plt.savefig(file_name)
     plt.clf()
 
     plt.plot(d_values, m2_values)
     plt.ylabel("Recall@10")
     plt.xlabel("D(latent variables) value")
 
-    plt.show()
+    file_name = "deliverable_three_metric_two"
+    plt.savefig(file_name)
     plt.clf()
 
 def generate_deliverable_four():
@@ -124,13 +139,10 @@ def generate_deliverable_four():
     plt.ylabel("Running Time")
     plt.xlabel("D(latent variables) value")
 
-    plt.show()
+    file_name = "deliverable_four"
+    plt.savefig(file_name)
     plt.clf()
 
-def test_plot():
-    train_error_mock = [2, 1.3, 1.1, 0.8, 0.67, 0.51, 0.44, 0.27, 0.11, 0.02]
-    test_error_mock = [2.3, 1.5, 1.4, 0.95, 0.88, 0.67, 0.64, 0.57, 0.51, 0.42]
-    plot_train_and_test_vs_iteration("SGD_Error", train_error_mock, test_error_mock, True)
 
 if __name__ == "__main__":
     # print("Error file parsed = {}".format(parse_error_file("mock_data")))

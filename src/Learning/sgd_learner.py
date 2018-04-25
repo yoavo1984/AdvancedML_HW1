@@ -19,7 +19,7 @@ class SGDLearner(Learner):
 
     def LearnModelFromDataUsingSGD(self, dataset, model, hyperparameters, save_to_file=False):
         alpha = hyperparameters.alpha
-        gamma_array = hyperparameters.gamma_array
+        lambda_array = hyperparameters.lambda_array
         train_dataset = dataset.get_train_dataset()
         test_dataset = dataset.get_test_dataset()
 
@@ -44,23 +44,23 @@ class SGDLearner(Learner):
 
         for epoch in range(hyperparameters.epochs):
             np.random.shuffle(datapoints)
-            alpha = alpha / 5
+            alpha = alpha / 3
             for point in datapoints:
                 user_id, movie_id, movie_true_rating = *point,
                 prediction = model.predict(user_id, movie_id)
                 error = movie_true_rating - prediction
 
                 model.u[user_id - 1] = model.u[user_id - 1] + alpha * (
-                    error * model.v[movie_id - 1] + gamma_array[U_INDEX] * model.u[user_id - 1])
+                    error * model.v[movie_id - 1] + lambda_array[U_INDEX] * model.u[user_id - 1])
 
                 model.v[movie_id - 1] = model.v[movie_id - 1] + alpha * (
-                    error * model.u[user_id - 1] + gamma_array[V_INDEX] * model.v[movie_id - 1])
+                    error * model.u[user_id - 1] + lambda_array[V_INDEX] * model.v[movie_id - 1])
 
                 model.b_user[user_id - 1] = model.b_user[user_id - 1] + alpha * (
-                    error + gamma_array[B_USER_INDEX] * model.b_user[user_id - 1])
+                    error + lambda_array[B_USER_INDEX] * model.b_user[user_id - 1])
 
                 model.b_movie[movie_id - 1] = model.b_movie[movie_id - 1] + alpha * (
-                    error + gamma_array[B_MOVIE_INDEX] * model.b_movie[movie_id - 1])
+                    error + lambda_array[B_MOVIE_INDEX] * model.b_movie[movie_id - 1])
 
             iterations += 1
             train_loss = Learner.loss_function(train_dataset["users"], model, hyperparameters)

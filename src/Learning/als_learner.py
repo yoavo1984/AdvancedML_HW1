@@ -21,7 +21,7 @@ class ALSLearner(Learner):
                 bias_sum += true_rating - (model.mu + model.b_movie[movie_id-1] + model.u_v_dot(user_id, movie_id))
 
             count = len(movies_ratings)
-            bias_sum = bias_sum / (count + hyperparameters.gamma_array[2])
+            bias_sum = bias_sum / (count + hyperparameters.lambda_array[2])
 
             # Update user bias to the calculated sum.
             model.b_user[user_id-1] = bias_sum
@@ -38,7 +38,7 @@ class ALSLearner(Learner):
                 bias_sum += true_rating - (model.mu + model.b_user[user_id - 1] + model.u_v_dot(user_id, movie_id))
 
             count = len(users_ratings)
-            bias_sum = bias_sum / (count + hyperparameters.gamma_array[1])
+            bias_sum = bias_sum / (count + hyperparameters.lambda_array[1])
 
             # Update movie bias to the calculated sum.
             model.b_movie[movie_id-1] = bias_sum
@@ -58,7 +58,7 @@ class ALSLearner(Learner):
                                           model.v[movie_id-1].reshape(hyperparameters.d, 1)
 
 
-            inv = np.linalg.inv(inverse_matrix + np.eye(hyperparameters.d)*hyperparameters.gamma_array[0])
+            inv = np.linalg.inv(inverse_matrix + np.eye(hyperparameters.d)*hyperparameters.lambda_array[0])
 
             # Update user latent vector.
             model.u[user_id-1] = np.dot(inv, predicton_delta_vector).T
@@ -76,7 +76,7 @@ class ALSLearner(Learner):
                 predicton_delta_vector +=  (true_rating - (model.mu + model.b_movie[movie_id - 1] + model.b_user[user_id - 1])) * \
                                           model.u[user_id - 1].reshape(hyperparameters.d, 1)
 
-            inv = np.linalg.inv(inverse_matrix + np.eye(hyperparameters.d)*hyperparameters.gamma_array[0])
+            inv = np.linalg.inv(inverse_matrix + np.eye(hyperparameters.d)*hyperparameters.lambda_array[0])
 
             # Update movie latent vector.
             model.v[movie_id - 1] = np.dot(inv, predicton_delta_vector).T

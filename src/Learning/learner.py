@@ -28,15 +28,15 @@ class Learner(object):
 
         sum = sum / 2
 
-        sum += (hyperparameters.gamma_array[U_INDEX] / 2) * np.linalg.norm(model.v) + \
-               (hyperparameters.gamma_array[V_INDEX] / 2) * np.linalg.norm(model.u) + \
-               (hyperparameters.gamma_array[B_USER_INDEX] / 2) * np.linalg.norm(model.b_user) + \
-               (hyperparameters.gamma_array[B_MOVIE_INDEX] / 2) * np.linalg.norm(model.b_movie)
+        sum += (hyperparameters.lambda_array[U_INDEX] / 2) * np.linalg.norm(model.v) + \
+               (hyperparameters.lambda_array[V_INDEX] / 2) * np.linalg.norm(model.u) + \
+               (hyperparameters.lambda_array[B_USER_INDEX] / 2) * np.linalg.norm(model.b_user) + \
+               (hyperparameters.lambda_array[B_MOVIE_INDEX] / 2) * np.linalg.norm(model.b_movie)
 
         return sum
 
     def open_log_file(self ,log_name ,model, hyperparameters):
-        file_name = "{}_k-{}_l-{}".format(log_name, hyperparameters.d, hyperparameters.gamma_array[0])
+        file_name = "{}_k-{}_l-{}".format(log_name, hyperparameters.d, hyperparameters.lambda_array[0])
         self.log_file[log_name] = open(file_name, 'w')
         self.log_file[log_name].write("#"*10 +"\t" + file_name + "\t" +"#"*10 + "\n\n")
 

@@ -10,25 +10,25 @@ from Model.hyper_parameters import *
 from Model.mf_model import MFModel
 
 POSSIBLE_D = [2,4,10,20,40,50,70,100,200]
-POSSIBLE_LAMDA = [0.1, 1, 10, 100, 1000]
+POSSIBLE_LAMBDA = [0.1, 1, 10, 100, 1000]
 MODEL_D = 10
-RATINGS_SIZE = 5000
+RATINGS_SIZE = -1
 RECALL_K = 10
 
 #=========================================== Delivrables ===============================================================
 def deliverable_two(dataset, model):
-    hyperparametersALS = MFALSHyperparameters(d=MODEL_D, alpha=0.002, lambda_array=[0.2, 0.2, 0.2, 0.2], epsilon=0.001)
+    hyperparametersALS = MFALSHyperparameters(d=model.d, lambda_array=[0.2, 0.2, 0.2, 0.2], epsillon=0.001)
     learner = ALSLearner()
 
     test_dataset = dataset.get_test_dataset()
     test_size = dataset.get_test_dataset_size()
 
     with open('deliverable/deliverable_2_data', 'w') as file:
-        for value in POSSIBLE_LAMDA:
+        for value in POSSIBLE_LAMBDA:
             model.reset_model()
-            hyperparametersALS.gamma_array = [value] * 4
+            hyperparametersALS.lambda_array = [value] * 4
 
-            learner.LearnModelFromDataUsingALS(dataset, model, hyperparametersALS)
+            learner.LearnModelFromDataUsingALS(dataset, model, hyperparametersALS, False)
 
             metric_one = rmse(test_dataset['users'], model, test_size)
             _, metric_two = recall_k(test_dataset['users'], model, RECALL_K)
@@ -39,7 +39,7 @@ def deliverable_two(dataset, model):
 
 
 def deliverable_three(dataset, model):
-    hyperparametersALS = MFALSHyperparameters(d=MODEL_D, alpha=0.002, lambda_array=[10] * 4, epsillon=0.001)
+    hyperparametersALS = MFALSHyperparameters(d=model.d,lambda_array=[10] * 4, epsillon=0.001)
     learner = ALSLearner()
 
     test_dataset = dataset.get_test_dataset()
@@ -52,7 +52,7 @@ def deliverable_three(dataset, model):
 
             model.reset_model()
 
-            learner.LearnModelFromDataUsingALS(dataset, model, hyperparametersALS)
+            learner.LearnModelFromDataUsingALS(dataset, model, hyperparametersALS, False)
 
             metric_one = rmse(test_dataset['users'], model, test_size)
             _, metric_two = recall_k(test_dataset['users'], model, RECALL_K)
@@ -62,7 +62,7 @@ def deliverable_three(dataset, model):
     print("- Finished deliverable 3\n")
 
 def deliverable_four(dataset, model):
-    hyperparametersALS = MFALSHyperparameters(d=MODEL_D, alpha=0.002, lambda_array=[10] * 4, epsillon=0.001)
+    hyperparametersALS = MFALSHyperparameters(d=model.d, lambda_array=[10] * 4, epsillon=0.001)
     learner = ALSLearner()
 
     with open('deliverable/deliverable_4_data', 'w') as file:
@@ -73,7 +73,7 @@ def deliverable_four(dataset, model):
 
             # Time measurement.
             start = time.time()
-            learner.LearnModelFromDataUsingALS(dataset, model, hyperparametersALS)
+            learner.LearnModelFromDataUsingALS(dataset, model, hyperparametersALS, False)
             total_time = time.time() - start
 
             file.write("{}::{}\n".format(d, round(total_time,2)))
@@ -92,7 +92,7 @@ def deliverable_five(dataset, model):
 
 
 def run_als(dataset, model):
-    hyperparametersALS = MFALSHyperparameters(d=MODEL_D, lambda_array=[12, .5, 12, .5], epsillon=0.001)
+    hyperparametersALS = MFALSHyperparameters(d=model.d, lambda_array=[12, .5, 12, .5], epsillon=0.001)
 
     for d in range (14, 15):
         model.d = d
@@ -100,7 +100,7 @@ def run_als(dataset, model):
         model.reset_model()
 
         learner = ALSLearner()
-        learner.LearnModelFromDataUsingALS(dataset, model, hyperparametersALS, True)
+        learner.LearnModelFromDataUsingALS(dataset, model, hyperparametersALS, False)
         print ("Rmse for {} is = {}".format(d, rmse(dataset.get_test_dataset()['users'], model)))
 
     return model
@@ -175,7 +175,7 @@ def build_model():
     num_users = rating_dataset.get_number_of_users()
     num_movies = rating_dataset.get_number_of_movies()
 
-    model = MFModel(num_users, num_movies, k=MODEL_D, mu=mu)
+    model = MFModel(num_users, num_movies, d=MODEL_D, mu=mu)
     return model
 
 def run_deliverables():
@@ -184,8 +184,8 @@ def run_deliverables():
     model = build_model()
     trained_model = run_als(rating_dataset, model)
 
-    print("Running Deliverables"
-          "--------------------")
+    print("Running Deliverables\n"
+          "--------------------\n")
     deliverable_two(rating_dataset, model)
     deliverable_three(rating_dataset, model)
     deliverable_four(rating_dataset, model)
@@ -193,4 +193,5 @@ def run_deliverables():
 
 if __name__ == "__main__":
     run_part_six()
+    # run_deliverables()
 
