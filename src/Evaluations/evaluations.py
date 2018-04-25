@@ -137,13 +137,13 @@ def calc_precision_recall_k(dataset_users, model, k):
         predicted_set = create_predicted(dataset_users, model, user_id, k)
         # because set.intersection would return ground truth after removing predicted from it
         tp = ground_truth_set.intersection(predicted_set)
-        fp = predicted_set.difference(ground_truth_set)
+        fn = predicted_set.difference(ground_truth_set)
         tn = ground_truth_set.difference(predicted_set)
 
         # tp + fp = k
         prec_k = len(tp) / k
-        # tp + tn = ground truth size = 25 in our case (top 25 movies)
-        reca_k = len(tp) / (len(tp) + len(tn))
+        # tp + tn = ground truth size
+        reca_k = len(tp) / len(ground_truth_set)
 
 
         users_prec_k[user_id-1] = prec_k
@@ -167,11 +167,11 @@ def single_user_precision_recall(dataset_users, user_id, model, k):
     predicted_set = create_predicted(dataset_users, model, user_id, k)
 
     tp = ground_truth_set.intersection(predicted_set)
-    fp = predicted_set.difference(ground_truth_set)
+    fn = predicted_set.difference(ground_truth_set)
     tn = ground_truth_set.difference(predicted_set)
 
     prec_k = len(tp) / k
-    reca_k = len(tp) / (len(tp) + len(tn))
+    reca_k = len(tp) / len(ground_truth_set)
 
     return prec_k, reca_k
 
@@ -204,7 +204,8 @@ def map(dataset_users, model):
     sum1 = 0
     sum2 = 0
     for user_id in dataset_users:
-        AP1, AP2 = average_preciison(3, len(dataset_users[user_id]))
+        ground_truth_set = create_ground_truth(dataset_users[user_id])
+        AP1, AP2 = average_preciison(len(ground_truth_set), len(dataset_users[user_id]))
         sum1 += AP1
         sum2 += AP2
 
